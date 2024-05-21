@@ -208,12 +208,20 @@ spec:
 {{- if .Values.radarr.ingress.tls.enabled }}
   tls:
     - hosts:
+{{ if .Values.general.ingress.enableSubdomains }}      
+        - {{ printf "%s.%s" "radarr" .Values.general.ingress_host | quote }}
+{{ else }}
         - {{ .Values.general.ingress_host | quote }}
+{{ end }}
       secretName: {{ .Values.radarr.ingress.tls.secretName }}
 {{ end }}
   ingressClassName: {{ .Values.general.ingress.ingressClassName }}
   rules:
+{{ if .Values.general.ingress.enableSubdomains }}      
+    - host: {{ printf "%s.%s" "radarr" .Values.general.ingress_host | quote }}
+{{ else }}
     - host: {{ .Values.general.ingress_host | quote }}
+{{ end }}
       http:
         paths:
           - path: {{ .Values.radarr.ingress.path }}

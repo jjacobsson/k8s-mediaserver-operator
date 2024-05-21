@@ -201,12 +201,20 @@ spec:
 {{ if .Values.prowlarr.ingress.tls.enabled }}
   tls:
     - hosts:
+{{ if .Values.general.ingress.enableSubdomains }}
+        - {{ printf "%s.%s" "prowlarr" .Values.general.ingress_host | quote }}
+{{ else }}
         - {{ .Values.general.ingress_host | quote }}
+{{ end }}
       secretName: {{ .Values.prowlarr.ingress.tls.secretName }}
 {{ end }}
   ingressClassName: {{ .Values.general.ingress.ingressClassName }}
   rules:
+{{ if .Values.general.ingress.enableSubdomains }}
+    - host: {{ printf "%s.%s" "prowlarr" .Values.general.ingress_host | quote }}
+{{ else }}    
     - host: {{ .Values.general.ingress_host | quote }}
+{{ end }}
       http:
         paths:
           - path: {{ .Values.prowlarr.ingress.path }}
