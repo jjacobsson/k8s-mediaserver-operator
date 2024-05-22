@@ -93,6 +93,18 @@ spec:
               mountPath: "/config"
               subPath: "{{ .Values.general.storage.subPaths.config }}/prowlarr"
           {{- end }}
+          {{- range .Values.prowlarr.extraVolumes }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              {{- if hasKey . "subPath" }}
+              subPath: {{ .subPath }}
+              {{- end }}              
+              {{- if hasKey . "readOnly" }}
+              readOnly: {{ .readOnly }}
+              {{- else }}
+              readOnly: true
+              {{- end }}
+          {{- end }}           
           {{- with .Values.prowlarr.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -115,6 +127,9 @@ spec:
           configMap:
             defaultMode: 493
             name: init-prowlarr-cm
+        {{- range .Values.prowlarr.extraVolumes }}
+        - name: {{ .name }}{{ toYaml .volume | trim | nindent 10 }}
+        {{- end }}            
       {{- with merge .Values.prowlarr.container.nodeSelector .Values.general.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

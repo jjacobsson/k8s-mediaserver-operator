@@ -169,6 +169,18 @@ spec:
             - name: mediaserver-volume
               mountPath: "/downloads"
               subPath: "{{ .Values.general.storage.subPaths.downloads }}"
+          {{- range .Values.transmission.extraVolumes }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              {{- if hasKey . "subPath" }}
+              subPath: {{ .subPath }}
+              {{- end }}              
+              {{- if hasKey . "readOnly" }}
+              readOnly: {{ .readOnly }}
+              {{- else }}
+              readOnly: true
+              {{- end }}
+          {{- end }}              
           {{- with .Values.transmission.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -191,6 +203,9 @@ spec:
           configMap:
             defaultMode: 493
             name: init-transmission-cm
+        {{- range .Values.sonarr.extraVolumes }}
+        - name: {{ .name }}{{ toYaml .volume | trim | nindent 10 }}
+        {{- end }}
       {{- with merge .Values.transmission.container.nodeSelector .Values.general.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

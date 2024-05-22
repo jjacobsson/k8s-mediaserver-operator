@@ -99,6 +99,18 @@ spec:
             - name: mediaserver-volume
               mountPath: "/tv"
               subPath: "{{ .Values.general.storage.subPaths.tv }}"
+          {{- range .Values.sonarr.extraVolumes }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              {{- if hasKey . "subPath" }}
+              subPath: {{ .subPath }}
+              {{- end }}              
+              {{- if hasKey . "readOnly" }}
+              readOnly: {{ .readOnly }}
+              {{- else }}
+              readOnly: true
+              {{- end }}
+          {{- end }}
           {{- with .Values.sonarr.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -121,6 +133,9 @@ spec:
           configMap:
             defaultMode: 493
             name: init-sonarr-cm
+        {{- range .Values.sonarr.extraVolumes }}
+        - name: {{ .name }}{{ toYaml .volume | trim | nindent 10 }}
+        {{- end }}
       {{- with merge .Values.sonarr.container.nodeSelector .Values.general.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

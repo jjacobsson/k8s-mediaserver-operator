@@ -407,6 +407,18 @@ spec:
             - name: mediaserver-volume
               mountPath: "/downloads"
               subPath: "{{ .Values.general.storage.subPaths.downloads }}"
+          {{- range .Values.sabnzbd.extraVolumes }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              {{- if hasKey . "subPath" }}
+              subPath: {{ .subPath }}
+              {{- end }}              
+              {{- if hasKey . "readOnly" }}
+              readOnly: {{ .readOnly }}
+              {{- else }}
+              readOnly: true
+              {{- end }}
+          {{- end }}             
           {{- with .Values.sabnzbd.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -429,6 +441,9 @@ spec:
           configMap:
             defaultMode: 493
             name: init-sabnzbd-cm
+        {{- range .Values.sabnzbd.extraVolumes }}
+        - name: {{ .name }}{{ toYaml .volume | trim | nindent 10 }}
+        {{- end }}
       {{- with merge .Values.sabnzbd.container.nodeSelector .Values.general.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
